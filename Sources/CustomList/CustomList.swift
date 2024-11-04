@@ -14,36 +14,11 @@ public struct CustomListItemBuilder {
     }
 }
 
-//public struct CustomListSectionModifier: ViewModifier {
-//    @Environment(\.colorScheme) private var colorScheme
-//    @Environment(ThemeProvider.self) private var themeProvider
-//    var theme: ThemeScheme { themeProvider.scheme }
-//
-//    var background: Color {
-//        switch theme {
-//        case .newYear_2024:
-//            return theme.accentColor.opacity(0.05)
-//        case .light, .system:
-//            return .white.opacity(0.3)
-//        case .dark:
-//            return Color(UIColor.secondarySystemBackground)
-//        }
-//    }
-//
-//    public func body(content: Content) -> some View {
-//        content
-//            .background(background)
-//            .clipShape(.rect(cornerRadius: 12))
-//    }
-//}
-
 public struct CustomList: View {
     var sections: [Section]
     var showingItemID: (String, String)?
 
     @Environment(\.colorScheme) private var colorScheme
-//    @Environment(ThemeProvider.self) private var themeProvider
-//    var theme: ThemeScheme { themeProvider.scheme }
 
     public init(showingItemID: (String, String)? = nil, @CustomListBuilder sections: () -> [Section]) {
         self.sections = sections()
@@ -79,7 +54,8 @@ public struct CustomList: View {
         VStack(alignment: .leading) {
             if let header = section.header {
                 header
-                    .font(.title2.bold())
+                    .font(.footnote)
+                    .foregroundStyle(Color(UIColor.secondaryLabel))
                     .padding(.leading)
             }
 
@@ -101,7 +77,6 @@ public struct CustomList: View {
                     }
                 }
             }
-//            .modifier(CustomListSectionModifier())
 
             if showingItem(itemID: nil, sectionID: section.id) {
                 if let footer = section.footer {
@@ -117,9 +92,19 @@ public struct CustomList: View {
     func itemView(_ item: Item, isLast: Bool, showingSeparators: Bool) -> some View {
         ZStack(alignment: .bottom) {
             HStack {
-                Image(systemName: "applelogo")
-                    .font(.body.bold())
-                    .padding(.trailing, 8)
+                if let icon = item.icon {
+                    switch icon {
+                    case .name(let string):
+                        Image(string)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 20)
+                    case .symbol(let string):
+                        Image(systemName: string)
+                            .bold()
+                            .padding(.trailing, 8)
+                    }
+                }
                 
                 item.title
 
@@ -138,6 +123,8 @@ public struct CustomList: View {
                                 .tag(item.id)
                         }
                     }
+                case .multiplePicker(let selection, let items):
+                    MultiplePicker(selection: selection, items: items)
                 case nil:
                     EmptyView()
                 }
@@ -147,8 +134,8 @@ public struct CustomList: View {
 
             if showingSeparators {
                 Divider()
-                    .padding(.leading)
-                    .padding(.leading)
+                    .padding(.leading, item.icon == nil ? 0 : nil)
+                    .padding(.leading, item.icon == nil ? 0 : nil)
                     .padding(.leading)
             }
         }
@@ -157,102 +144,42 @@ public struct CustomList: View {
     }
 }
 
-extension CustomList {
-    public struct Item: Identifiable {
-        public struct PickerItem: Identifiable {
-            public var id: String
-            var title: Text
-
-            public init(id: String, title: Text) {
-                self.id = id
-                self.title = title
-            }
+#if DEBUG
+@available(iOS 17.0, *)
+#Preview {
+    @Previewable @State var multiplePickerItems: [String] = []
+    
+    CustomList {
+        CustomList.Section(footer: Text("footer")) {
+            CustomList.Item(Text("hahha"), icon: .symbol("applelogo")) {}
+            CustomList.Item(Text("hahha3"), icon: .symbol("person"), action: nil)
         }
-
-        public enum Action {
-            case tap(() -> Void)
-            case toggle(Binding<Bool>)
-            case picker(Binding<String>, [PickerItem])
+        
+        CustomList.Section(header: Text("Header")) {
+            CustomList.Item(Text("hahha"), icon: .symbol("star")) {}
+            CustomList.Item(Text("hahha3"), action: nil)
         }
-
-        public var id: String
-        var title: Text
-        var icon: String?
-        var action: Action?
-
-        public init(id: String = UUID().uuidString, title: String, icon: String = "about", tap: (() -> Void)? = nil) {
-            self.id = id
-            self.title = Text(title)
-            self.icon = icon
-
-            if let tap {
-                self.action = .tap(tap)
-            }
-        }
-
-        public init(id: String = UUID().uuidString, _ titleText: Text, icon: String? = nil, tap: (() -> Void)? = nil) {
-            self.id = id
-            self.title = titleText
-            self.icon = icon
-
-            if let tap {
-                self.action = .tap(tap)
-            }
-        }
-
-        public init(id: String = UUID().uuidString, _ titleText: Text, icon: String = "about", action: Action? = nil) {
-            self.id = id
-            self.title = titleText
-            self.icon = icon
-            self.action = action
-        }
-
-        public init(id: String = UUID().uuidString, title: String, icon: String = "about", action: Action? = nil) {
-            self.id = id
-            self.title = Text(title)
-            self.icon = icon
-            self.action = action
-        }
-    }
-
-    public struct Section: Identifiable {
-        public var id: String
-        var items: [Item]
-        var header: Text?
-        var footer: Text?
-        var showingSeparators: Bool
-
-        public init(id: String = UUID().uuidString, header: Text? = nil, footer: Text? = nil, @CustomListItemBuilder items: () -> [Item],  showingSeparators: Bool = true) {
-            self.id = id
-            self.items = items()
-            self.header = header
-            self.footer = footer
-            self.showingSeparators = showingSeparators
+        
+        CustomList.Section {
+            CustomList.Item(Text("hahha2"), action: nil)
+            
+            CustomList.Item(Text("toggle"), action: .toggle(.constant(true)))
+            
+            CustomList.Item(Text("picker"), action: .picker(.constant("1"), [
+                .init(id: "1", title: Text("1")),
+                .init(id: "2", title: Text("2")),
+            ]))
+            
+            CustomList.Item(
+                title: "multiplePicker",
+                action: .multiplePicker(
+                    $multiplePickerItems, [
+                        .init(id: "1", title: Text("1")),
+                        .init(id: "2", title: Text("2")),
+                    ]
+                )
+            )
         }
     }
 }
-
-#if DEBUG
-    #Preview {
-        CustomList {
-            CustomList.Section(footer: Text("footer")) {
-                CustomList.Item(title: "hahha") {}
-                CustomList.Item(title: "hahha3", action: nil)
-            }
-            
-            CustomList.Section {
-                CustomList.Item(title: "hahha") {}
-                CustomList.Item(title: "hahha3", action: nil)
-            }
-            
-            CustomList.Section {
-                CustomList.Item(title: "hahha2", action: nil)
-                CustomList.Item(title: "toggle", action: .toggle(.constant(true)))
-                CustomList.Item(title: "picker", action: .picker(.constant("1"), [
-                    .init(id: "1", title: Text("1")),
-                    .init(id: "2", title: Text("2")),
-                ]))
-            }
-        }
-    }
 #endif
