@@ -1,17 +1,8 @@
 import SwiftUI
 
-@resultBuilder
-public struct CustomListBuilder {
-    public static func buildBlock(_ components: CustomList.Section...) -> [CustomList.Section] {
-        components
-    }
-}
-
-@resultBuilder
-public struct CustomListItemBuilder {
-    public static func buildBlock(_ components: CustomList.Item...) -> [CustomList.Item] {
-        components
-    }
+public extension EnvironmentValues {
+    @Entry var customListSectionBackground: Color = Color(UIColor.systemBackground)
+    @Entry var customListSectionCornerRadius: CGFloat = 12
 }
 
 public struct CustomList: View {
@@ -19,6 +10,8 @@ public struct CustomList: View {
     var showingItemID: (String, String)?
 
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.customListSectionBackground) private var customListSectionBackground
+    @Environment(\.customListSectionCornerRadius) private var customListSectionCornerRadius
 
     public init(showingItemID: (String, String)? = nil, @CustomListBuilder sections: () -> [Section]) {
         self.sections = sections()
@@ -77,6 +70,8 @@ public struct CustomList: View {
                     }
                 }
             }
+            .background(customListSectionBackground)
+            .clipShape(.rect(cornerRadius: customListSectionCornerRadius))
 
             if showingItem(itemID: nil, sectionID: section.id) {
                 if let footer = section.footer {
@@ -125,6 +120,8 @@ public struct CustomList: View {
                     }
                 case .multiplePicker(let selection, let items):
                     MultiplePicker(selection: selection, items: items)
+                case .text(let text):
+                    text
                 case nil:
                     EmptyView()
                 }

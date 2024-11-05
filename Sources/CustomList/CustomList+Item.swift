@@ -24,6 +24,7 @@ extension CustomList {
             case toggle(Binding<Bool>)
             case picker(Binding<String>, [PickerItem])
             case multiplePicker(Binding<[String]>, [PickerItem])
+            case text(Text)
         }
         
         public enum Icon {
@@ -34,6 +35,13 @@ extension CustomList {
         var title: Text
         var icon: Icon?
         var action: Action?
+        
+        public init(id: String = UUID().uuidString, _ title: Text, icon: Icon? = nil, text: Text) {
+            self.id = id
+            self.title = title
+            self.icon = icon
+            self.action = .text(text)
+        }
 
         public init(id: String = UUID().uuidString, _ titleText: Text, icon: Icon? = nil, tap: (() -> Void)? = nil) {
             self.id = id
