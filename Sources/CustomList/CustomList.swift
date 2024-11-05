@@ -104,6 +104,10 @@ public struct CustomList: View {
                 item.title
 
                 Spacer()
+                
+                if let trailingText = item.trailingText {
+                    trailingText
+                }
 
                 switch item.action {
                 case .tap:
@@ -120,8 +124,6 @@ public struct CustomList: View {
                     }
                 case .multiplePicker(let selection, let items):
                     MultiplePicker(selection: selection, items: items)
-                case .text(let text):
-                    text
                 case nil:
                     EmptyView()
                 }
@@ -168,7 +170,7 @@ public struct CustomList: View {
             ]))
             
             CustomList.Item(
-                title: "multiplePicker",
+                Text("multiplePicker"),
                 action: .multiplePicker(
                     $multiplePickerItems, [
                         .init(id: "1", title: Text("1")),

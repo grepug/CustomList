@@ -24,7 +24,6 @@ extension CustomList {
             case toggle(Binding<Bool>)
             case picker(Binding<String>, [PickerItem])
             case multiplePicker(Binding<[String]>, [PickerItem])
-            case text(Text)
         }
         
         public enum Icon {
@@ -35,36 +34,25 @@ extension CustomList {
         var title: Text
         var icon: Icon?
         var action: Action?
+        var trailingText: Text?
         
-        public init(id: String = UUID().uuidString, _ title: Text, icon: Icon? = nil, text: Text) {
-            self.id = id
-            self.title = title
-            self.icon = icon
-            self.action = .text(text)
-        }
-
-        public init(id: String = UUID().uuidString, _ titleText: Text, icon: Icon? = nil, tap: (() -> Void)? = nil) {
+        public init(id: String = UUID().uuidString, _ titleText: Text, icon: Icon? = nil, trailingText: Text? = nil, tap: (() -> Void)? = nil) {
             self.id = id
             self.title = titleText
             self.icon = icon
+            self.trailingText = trailingText
 
             if let tap {
                 self.action = .tap(tap)
             }
         }
 
-        public init(id: String = UUID().uuidString, _ titleText: Text, icon: Icon? = nil, action: Action? = nil) {
+        public init(id: String = UUID().uuidString, _ titleText: Text, icon: Icon? = nil, trailingText: Text? = nil, action: Action? = nil) {
             self.id = id
             self.title = titleText
             self.icon = icon
             self.action = action
-        }
-
-        public init(id: String = UUID().uuidString, title: String, icon: Icon? = nil, action: Action? = nil) {
-            self.id = id
-            self.title = Text(title)
-            self.icon = icon
-            self.action = action
+            self.trailingText = trailingText
         }
     }
 
