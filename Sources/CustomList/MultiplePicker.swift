@@ -7,16 +7,61 @@
 
 import SwiftUI
 
+struct MultiplePickerPopover: View {
+    @Binding var selection: [String]
+    @Binding var isPresented: Bool
+    var items: [CustomList.Item.PickerItem]
+    
+    var body: some View {
+        NavigationStack {
+            List {
+                ForEach(items) { item in
+                    Button {
+                        if selection.contains(item.id) {
+                            selection.removeAll(where: { $0 == item.id })
+                        } else {
+                            selection.append(item.id)
+                        }
+                    } label: {
+                        HStack {
+                            item.title
+                            Spacer()
+                            if selection.contains(item.id) {
+                                Image(systemName: "checkmark")
+                                    .foregroundStyle(Color.accentColor)
+                            }
+                        }
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Done") {
+                        isPresented = false
+                    }
+                    .bold()
+                }
+            }
+        }
+        .presentationDetents(
+            [.custom(BarDetent.self)]
+        )
+    }
+}
+
 struct MultiplePicker: View {
+    @Binding var isPresented: Bool
     @Binding var selection: [String]
     var items: [CustomList.Item.PickerItem]
 
-    @State private var isPresented = false
-
     // make a popover with a list of items
     var body: some View {
+        let _ = Self._printChanges()
+        
         Button {
-            isPresented.toggle()
+            isPresented = true
         } label: {
             HStack {
                 if selection.isEmpty {
@@ -34,43 +79,6 @@ struct MultiplePicker: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .popover(isPresented: $isPresented) {
-            NavigationStack {
-                List {
-                    ForEach(items) { item in
-                        Button {
-                            if selection.contains(item.id) {
-                                selection.removeAll(where: { $0 == item.id })
-                            } else {
-                                selection.append(item.id)
-                            }
-                        } label: {
-                            HStack {
-                                item.title
-                                Spacer()
-                                if selection.contains(item.id) {
-                                    Image(systemName: "checkmark")
-                                        .foregroundStyle(Color.accentColor)
-                                }
-                            }
-                            .contentShape(Rectangle())
-                        }
-                        .buttonStyle(.plain)
-                    }
-                }
-                .toolbar {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button("Done") {
-                            isPresented.toggle()
-                        }
-                        .bold()
-                    }
-                }
-            }
-            .presentationDetents(
-                [.custom(BarDetent.self)]
-            )
-        }
     }
 }
 

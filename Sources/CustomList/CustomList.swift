@@ -12,6 +12,8 @@ public struct CustomList: View {
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.customListSectionBackground) private var customListSectionBackground
     @Environment(\.customListSectionCornerRadius) private var customListSectionCornerRadius
+    
+    @State private var multiplePickerPresentedItem: Item?
 
     public init(showingItemID: (String, String)? = nil, @CustomListBuilder sections: () -> [Section]) {
         self.sections = sections()
@@ -29,6 +31,14 @@ public struct CustomList: View {
             }
         }
         .padding()
+        .sheet(item: $multiplePickerPresentedItem) { item in
+            switch item.action {
+            case .multiplePicker(let selection, let items):
+                MultiplePickerPopover(selection: selection, isPresented: .constant(true), items: items)
+            default:
+                EmptyView()
+            }
+        }
     }
 
     func showingItem(itemID: String?, sectionID: String) -> Bool {
@@ -123,7 +133,18 @@ public struct CustomList: View {
                         }
                     }
                 case .multiplePicker(let selection, let items):
-                    MultiplePicker(selection: selection, items: items)
+                    let isPresented: Binding<Bool> = .init(
+                        get: { multiplePickerPresentedItem?.id == item.id },
+                        set: { newValue in
+                            if newValue {
+                                multiplePickerPresentedItem = item
+                            } else {
+                                multiplePickerPresentedItem = nil
+                            }
+                        }
+                    )
+                    
+                    MultiplePicker(isPresented: isPresented, selection: selection, items: items)
                 case nil:
                     EmptyView()
                 }
@@ -139,7 +160,6 @@ public struct CustomList: View {
             }
         }
         .contentShape(Rectangle())
-    
     }
 }
 
