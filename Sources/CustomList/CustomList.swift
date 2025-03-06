@@ -1,7 +1,11 @@
 import SwiftUI
 
 public extension EnvironmentValues {
+    #if os(iOS)
     @Entry var customListSectionBackground: Color = Color(UIColor.systemBackground)
+    #else
+    @Entry var customListSectionBackground: Color = Color(NSColor.windowBackgroundColor)
+    #endif
     @Entry var customListSectionCornerRadius: CGFloat = 12
 }
 
@@ -58,7 +62,7 @@ public struct CustomList: View {
             if let header = section.header {
                 header
                     .font(.footnote)
-                    .foregroundStyle(Color(UIColor.secondaryLabel))
+                    .foregroundStyle(Color.secondary)
                     .padding(.leading)
             }
 
@@ -87,7 +91,7 @@ public struct CustomList: View {
                 if let footer = section.footer {
                     footer
                         .font(.footnote)
-                        .foregroundStyle(Color(UIColor.secondaryLabel))
+                        .foregroundStyle(Color.secondary)
                         .padding(.leading)
                 }
             }
@@ -163,8 +167,18 @@ public struct CustomList: View {
     }
 }
 
+extension Color {
+    static var secondary: Color {
+        #if os(iOS)
+        Color(UIColor.secondaryLabel)
+        #else
+        Color(NSColor.secondaryLabelColor)
+        #endif
+    }
+}
+
 #if DEBUG
-@available(iOS 17.0, *)
+@available(iOS 17.0, macOS 14.0, *)
 #Preview {
     @Previewable @State var multiplePickerItems: [String] = []
     

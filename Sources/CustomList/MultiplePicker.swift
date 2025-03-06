@@ -37,12 +37,14 @@ struct MultiplePickerPopover: View {
                 }
             }
             .toolbar {
+                #if os(iOS)
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Done") {
                         isPresented = false
                     }
                     .bold()
                 }
+                #endif
             }
         }
         .presentationDetents(
