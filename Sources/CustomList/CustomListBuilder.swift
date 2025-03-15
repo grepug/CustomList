@@ -28,9 +28,13 @@ public struct CustomListItemBuilder {
 
 //supports if else
 public extension CustomListBuilder {
-//    static func buildIf(_ component: [CustomList.Section]?) -> [CustomList.Section] {
-//        component ?? []
-//    }
+    static func buildIf(_ component: [CustomList.Section]?) -> [CustomList.Section] {
+        component ?? []
+    }
+    
+    static func buildOptional(_ component: [CustomList.Section]?) -> [CustomList.Section] {
+        component ?? []
+    }
 }
 
 // supports switch
@@ -44,18 +48,28 @@ public extension CustomListBuilder {
     }
 }
 
-//Closure containing control flow statement cannot be used with result builder 'CustomListItemBuilder'
 public extension CustomListItemBuilder {
-//    static func buildIf(_ component: [CustomList.Item]?) -> [CustomList.Item] {
-//        component ?? []
-//    }
+    static func buildIf(_ component: [CustomList.Item]?) -> [CustomList.Item] {
+        component ?? []
+    }
     
     static func buildOptional(_ component: [CustomList.Item]?) -> [CustomList.Item] {
-        component?.compactMap { $0 } ?? []
+        component ?? []
+    }
+    
+    static func buildArray(_ components: [[CustomList.Item]]) -> [CustomList.Item] {
+        components.flatMap { $0 }
+    }
+    
+    static func buildExpression(_ expression: CustomList.Item) -> [CustomList.Item] {
+        [expression]
+    }
+    
+    static func buildExpression(_ expression: [CustomList.Item]) -> [CustomList.Item] {
+        expression
     }
 }
 
-//Cannot pass array of type '[CustomList.Item]' as variadic arguments of type 'CustomList.Item'
 public extension CustomListItemBuilder {
     static func buildEither(first component: [CustomList.Item]) -> [CustomList.Item] {
         component
